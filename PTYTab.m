@@ -273,6 +273,13 @@ static const BOOL USE_THIN_SPLITTERS = YES;
     return result;
 }
 
+- (void)_updateWindows:(NSNotification *)notification
+{
+	NSDictionary *options = [notification userInfo];
+	BOOL borderlessWindow = [[options valueForKey:@"BorderlessWindow"] boolValue];
+    [parentWindow_ updateWindowBorders:borderlessWindow];
+}
+
 - (void)_refreshLabels:(id)sender
 {
     [tabViewItem_ setLabel:[[self activeSession] name]];
@@ -1712,7 +1719,7 @@ static NSString* FormatRect(NSRect r) {
             [sv setFrame:frame];
         }
     }
-    return (isVertical ? 
+    return (isVertical ?
             NSMakeSize(offset - dividerThickness, maxAgainstGrain) :
             NSMakeSize(maxAgainstGrain, offset - dividerThickness));
 }

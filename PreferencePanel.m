@@ -575,7 +575,7 @@ static float versionNumber;
     keyboardToolbarId = [keyboardToolbarItem itemIdentifier];
     arrangementsToolbarId = [arrangementsToolbarItem itemIdentifier];
     mouseToolbarId = [mouseToolbarItem itemIdentifier];
-  
+
     [globalToolbarItem setEnabled:YES];
     [toolbar setSelectedItemIdentifier:globalToolbarId];
 
@@ -682,7 +682,7 @@ static float versionNumber;
 
     [self setAdvancedBookmarkMatrix:awdsWindowDirectoryType
                           withValue:[bookmark objectForKey:KEY_AWDS_WIN_OPTION]];
-    [self safelySetStringValue:[bookmark objectForKey:KEY_AWDS_WIN_DIRECTORY] 
+    [self safelySetStringValue:[bookmark objectForKey:KEY_AWDS_WIN_DIRECTORY]
                             in:awdsWindowDirectory];
 
     [self setAdvancedBookmarkMatrix:awdsTabDirectoryType
@@ -1221,6 +1221,7 @@ static float versionNumber;
     defaultDisableFullscreenTransparency = [prefs objectForKey:@"DisableFullscreenTransparency"] ? [[prefs objectForKey:@"DisableFullscreenTransparency"] boolValue] : NO;
     defaultSmartPlacement = [prefs objectForKey:@"SmartPlacement"]?[[prefs objectForKey:@"SmartPlacement"] boolValue]: NO;
     defaultAdjustWindowForFontSizeChange = [prefs objectForKey:@"AdjustWindowForFontSizeChange"]?[[prefs objectForKey:@"AdjustWindowForFontSizeChange"] boolValue]: YES;
+    defaultBorderlessWindow = [prefs objectForKey:@"BorderlessWindow"]?[[prefs objectForKey:@"BorderlessWindow"] boolValue]: YES;
     defaultWindowNumber = [prefs objectForKey:@"WindowNumber"]?[[prefs objectForKey:@"WindowNumber"] boolValue]: YES;
     defaultJobName = [prefs objectForKey:@"JobName"]?[[prefs objectForKey:@"JobName"] boolValue]: YES;
     defaultShowBookmarkName = [prefs objectForKey:@"ShowBookmarkName"]?[[prefs objectForKey:@"ShowBookmarkName"] boolValue] : NO;
@@ -1317,7 +1318,7 @@ static float versionNumber;
     [prefs setBool:defaultThreeFingerEmulatesMiddle forKey:@"ThreeFingerEmulates"];
     [prefs setBool:defaultHideTab forKey:@"HideTab"];
     [prefs setInteger:defaultWindowStyle forKey:@"WindowStyle"];
-	[prefs setInteger:defaultOpenTmuxWindowsIn forKey:@"OpenTmuxWindowsIn"];
+    [prefs setInteger:defaultOpenTmuxWindowsIn forKey:@"OpenTmuxWindowsIn"];
     [prefs setBool:defaultAutoHideTmuxClientSession forKey:@"AutoHideTmuxClientSession"];
     [prefs setInteger:defaultTabViewType forKey:@"TabViewType"];
     [prefs setBool:defaultPromptOnQuit forKey:@"PromptOnQuit"];
@@ -1339,7 +1340,7 @@ static float versionNumber;
     [prefs setFloat:defaultStrokeThickness forKey:@"HiddenAFRStrokeThickness"];
     [prefs setObject:defaultWordChars forKey: @"WordCharacters"];
     [prefs setObject:[NSNumber numberWithInt:defaultTmuxDashboardLimit]
-			  forKey:@"TmuxDashboardLimit"];
+    		  forKey:@"TmuxDashboardLimit"];
     [prefs setBool:defaultOpenBookmark forKey:@"OpenBookmark"];
     [prefs setObject:[dataSource rawData] forKey: @"New Bookmarks"];
     [prefs setBool:defaultQuitWhenAllWindowsClosed forKey:@"QuitWhenAllWindowsClosed"];
@@ -1348,6 +1349,7 @@ static float versionNumber;
     [prefs setBool:defaultShowPaneTitles forKey:@"ShowPaneTitles"];
     [prefs setBool:defaultDisableFullscreenTransparency forKey:@"DisableFullscreenTransparency"];
     [prefs setBool:defaultSmartPlacement forKey:@"SmartPlacement"];
+    [prefs setBool:defaultBorderlessWindow forKey:@"BorderlessWindow"];
     [prefs setBool:defaultAdjustWindowForFontSizeChange forKey:@"AdjustWindowForFontSizeChange"];
     [prefs setBool:defaultWindowNumber forKey:@"WindowNumber"];
     [prefs setBool:defaultJobName forKey:@"JobName"];
@@ -1445,6 +1447,7 @@ static float versionNumber;
     [showPaneTitles setState:defaultShowPaneTitles?NSOnState:NSOffState];
     [disableFullscreenTransparency setState:defaultDisableFullscreenTransparency ? NSOnState : NSOffState];
     [smartPlacement setState: defaultSmartPlacement?NSOnState:NSOffState];
+    [borderlessWindow setState: defaultBorderlessWindow?NSOnState:NSOffState];
     [adjustWindowForFontSizeChange setState: defaultAdjustWindowForFontSizeChange?NSOnState:NSOffState];
     [windowNumber setState: defaultWindowNumber?NSOnState:NSOffState];
     [jobName setState: defaultJobName?NSOnState:NSOffState];
@@ -1607,7 +1610,14 @@ static float versionNumber;
 
 - (IBAction)settingChanged:(id)sender
 {
-    if (sender == lionStyleFullscreen) {
+    if (sender == borderlessWindow) {
+        defaultBorderlessWindow = ([borderlessWindow state] == NSOnState);
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"iTermUpdateWindows"
+                                                            object:self
+                                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                    [NSNumber numberWithBool:defaultBorderlessWindow], @"BorderlessWindow",
+                                                                    nil, nil]];
+    } else if (sender == lionStyleFullscreen) {
         defaultLionStyleFullscreen = ([lionStyleFullscreen state] == NSOnState);
     } else if (sender == loadPrefsFromCustomFolder) {
         defaultLoadPrefsFromCustomFolder = [loadPrefsFromCustomFolder state] == NSOnState;
@@ -1656,7 +1666,7 @@ static float versionNumber;
         sender == animateDimming ||
         sender == dimOnlyText ||
         sender == dimmingAmount ||
-		sender == openTmuxWindows ||
+    	sender == openTmuxWindows ||
         sender == threeFingerEmulatesMiddle ||
         sender == autoHideTmuxClientSession ||
         sender == showWindowBorder) {
@@ -1769,10 +1779,11 @@ static float versionNumber;
         defaultOpenBookmark = ([openBookmark state] == NSOnState);
         [defaultWordChars release];
         defaultWordChars = [[wordChars stringValue] retain];
-		defaultTmuxDashboardLimit = [[tmuxDashboardLimit stringValue] intValue];
+    	defaultTmuxDashboardLimit = [[tmuxDashboardLimit stringValue] intValue];
         defaultQuitWhenAllWindowsClosed = ([quitWhenAllWindowsClosed state] == NSOnState);
         defaultCheckUpdate = ([checkUpdate state] == NSOnState);
         defaultSmartPlacement = ([smartPlacement state] == NSOnState);
+        defaultBorderlessWindow = ([borderlessWindow state] == NSOnState);
         defaultAdjustWindowForFontSizeChange = ([adjustWindowForFontSizeChange state] == NSOnState);
         defaultSavePasteHistory = ([savePasteHistory state] == NSOnState);
         if (!defaultSavePasteHistory) {
@@ -1924,7 +1935,7 @@ static float versionNumber;
 
 - (int)openTmuxWindowsIn
 {
-	return defaultOpenTmuxWindowsIn;
+    return defaultOpenTmuxWindowsIn;
 }
 
 - (BOOL)autoHideTmuxClientSession
@@ -1934,7 +1945,7 @@ static float versionNumber;
 
 - (int)tmuxDashboardLimit
 {
-	return defaultTmuxDashboardLimit;
+    return defaultTmuxDashboardLimit;
 }
 
 - (BOOL)promptOnQuit
@@ -2048,6 +2059,11 @@ static float versionNumber;
 - (BOOL)smartPlacement
 {
     return defaultSmartPlacement;
+}
+
+- (BOOL)borderlessWindow
+{
+    return defaultBorderlessWindow;
 }
 
 - (BOOL)adjustWindowForFontSizeChange
@@ -2225,8 +2241,8 @@ static float versionNumber;
     if ([self _stringIsUrlLike:folder]) {
         filename = folder;
     } else {
-		filename = [filename stringByExpandingTildeInPath];
-	}
+    	filename = [filename stringByExpandingTildeInPath];
+    }
     return filename;
 }
 
@@ -2864,12 +2880,12 @@ static float versionNumber;
     }
 
     [transparency setFloatValue:[[dict objectForKey:KEY_TRANSPARENCY] floatValue]];
-	if ([dict objectForKey:KEY_BLEND]) {
-	  [blend setFloatValue:[[dict objectForKey:KEY_BLEND] floatValue]];
-	} else {
-		// Old clients used transparency for blending
-		[blend setFloatValue:[[dict objectForKey:KEY_TRANSPARENCY] floatValue]];
-	}
+    if ([dict objectForKey:KEY_BLEND]) {
+      [blend setFloatValue:[[dict objectForKey:KEY_BLEND] floatValue]];
+    } else {
+    	// Old clients used transparency for blending
+    	[blend setFloatValue:[[dict objectForKey:KEY_TRANSPARENCY] floatValue]];
+    }
     [blurRadius setFloatValue:[dict objectForKey:KEY_BLUR_RADIUS] ? [[dict objectForKey:KEY_BLUR_RADIUS] floatValue] : 2.0];
     [blur setState:[[dict objectForKey:KEY_BLUR] boolValue] ? NSOnState : NSOffState];
     if ([dict objectForKey:KEY_ASCII_ANTI_ALIASED]) {
@@ -2893,7 +2909,7 @@ static float versionNumber;
 
     // Terminal tab
     [disableWindowResizing setState:[[dict objectForKey:KEY_DISABLE_WINDOW_RESIZING] boolValue] ? NSOnState : NSOffState];
-	[hideAfterOpening setState:[[dict objectForKey:KEY_HIDE_AFTER_OPENING] boolValue] ? NSOnState : NSOffState];
+    [hideAfterOpening setState:[[dict objectForKey:KEY_HIDE_AFTER_OPENING] boolValue] ? NSOnState : NSOffState];
     [syncTitle setState:[[dict objectForKey:KEY_SYNC_TITLE] boolValue] ? NSOnState : NSOffState];
     [closeSessionsOnEnd setState:[[dict objectForKey:KEY_CLOSE_SESSIONS_ON_END] boolValue] ? NSOnState : NSOffState];
     [nonAsciiDoubleWidth setState:[[dict objectForKey:KEY_AMBIGUOUS_DOUBLE_WIDTH] boolValue] ? NSOnState : NSOffState];
@@ -2905,7 +2921,7 @@ static float versionNumber;
     [allowTitleReporting setState:[[dict objectForKey:KEY_ALLOW_TITLE_REPORTING] boolValue] ? NSOnState : NSOffState];
     [disablePrinting setState:[[dict objectForKey:KEY_DISABLE_PRINTING] boolValue] ? NSOnState : NSOffState];
     [scrollbackWithStatusBar setState:[[dict objectForKey:KEY_SCROLLBACK_WITH_STATUS_BAR] boolValue] ? NSOnState : NSOffState];
-    [scrollbackInAlternateScreen setState:[dict objectForKey:KEY_SCROLLBACK_IN_ALTERNATE_SCREEN] ? 
+    [scrollbackInAlternateScreen setState:[dict objectForKey:KEY_SCROLLBACK_IN_ALTERNATE_SCREEN] ?
          ([[dict objectForKey:KEY_SCROLLBACK_IN_ALTERNATE_SCREEN] boolValue] ? NSOnState : NSOffState) : NSOnState];
     [bookmarkGrowlNotifications setState:[[dict objectForKey:KEY_BOOKMARK_GROWL_NOTIFICATIONS] boolValue] ? NSOnState : NSOffState];
     [setLocaleVars setState:[dict objectForKey:KEY_SET_LOCALE_VARS] ? ([[dict objectForKey:KEY_SET_LOCALE_VARS] boolValue] ? NSOnState : NSOffState) : NSOnState];
@@ -3212,7 +3228,7 @@ static float versionNumber;
         for (int i = 0; i < [dataSource numberOfBookmarks]; ++i) {
             Profile* temp = [dataSource profileAtIndex:i];
             NSString* existingShortcut = [temp objectForKey:KEY_SHORTCUT];
-            if ([shortcut length] > 0 && 
+            if ([shortcut length] > 0 &&
                 [existingShortcut isEqualToString:shortcut] &&
                 temp != origBookmark) {
                 [dataSource setObject:nil forKey:KEY_SHORTCUT inBookmark:temp];
@@ -3355,7 +3371,7 @@ static float versionNumber;
     } else if (sender == unlimitedScrollback) {
         [scrollbackLines setStringValue:@"10000"];
     }
-    
+
     [newDict setObject:[terminalType stringValue] forKey:KEY_TERMINAL_TYPE];
     [newDict setObject:[NSNumber numberWithBool:([sendCodeWhenIdle state]==NSOnState)] forKey:KEY_SEND_CODE_WHEN_IDLE];
     [newDict setObject:[NSNumber numberWithInt:[idleCode intValue]] forKey:KEY_IDLE_CODE];
@@ -3657,21 +3673,21 @@ static float versionNumber;
 }
 
 - (void)forceTextFieldToBeNumber:(NSTextField *)textField
-				 acceptableRange:(NSRange)range
+    			 acceptableRange:(NSRange)range
 {
-	// NSNumberFormatter seems to have lost its mind on Lion. See a description of the problem here:
-	// http://stackoverflow.com/questions/7976951/nsnumberformatter-erasing-value-when-it-violates-constraints
-	int iv = [self intForString:[textField stringValue] inRange:range];
-	unichar lastChar = '0';
-	int numChars = [[textField stringValue] length];
-	if (numChars) {
-		lastChar = [[textField stringValue] characterAtIndex:numChars - 1];
-	}
-	if (iv != [textField intValue] || (lastChar < '0' || lastChar > '9')) {
-		// If the int values don't match up or there are terminal non-number
-		// chars, then update the value.
-		[textField setIntValue:iv];
-	}
+    // NSNumberFormatter seems to have lost its mind on Lion. See a description of the problem here:
+    // http://stackoverflow.com/questions/7976951/nsnumberformatter-erasing-value-when-it-violates-constraints
+    int iv = [self intForString:[textField stringValue] inRange:range];
+    unichar lastChar = '0';
+    int numChars = [[textField stringValue] length];
+    if (numChars) {
+    	lastChar = [[textField stringValue] characterAtIndex:numChars - 1];
+    }
+    if (iv != [textField intValue] || (lastChar < '0' || lastChar > '9')) {
+    	// If the int values don't match up or there are terminal non-number
+    	// chars, then update the value.
+    	[textField setIntValue:iv];
+    }
 }
 
 // NSTextField delegate
@@ -3680,13 +3696,13 @@ static float versionNumber;
     id obj = [aNotification object];
     if (obj == wordChars) {
         defaultWordChars = [[wordChars stringValue] retain];
-	} else if (obj == tmuxDashboardLimit) {
-		[self forceTextFieldToBeNumber:tmuxDashboardLimit
-					   acceptableRange:NSMakeRange(0, 1000)];
-		defaultTmuxDashboardLimit = [[tmuxDashboardLimit stringValue] intValue];
+    } else if (obj == tmuxDashboardLimit) {
+    	[self forceTextFieldToBeNumber:tmuxDashboardLimit
+    				   acceptableRange:NSMakeRange(0, 1000)];
+    	defaultTmuxDashboardLimit = [[tmuxDashboardLimit stringValue] intValue];
     } else if (obj == scrollbackLines) {
-		[self forceTextFieldToBeNumber:scrollbackLines
-					   acceptableRange:NSMakeRange(0, 10 * 1000 * 1000)];
+    	[self forceTextFieldToBeNumber:scrollbackLines
+    				   acceptableRange:NSMakeRange(0, 10 * 1000 * 1000)];
         [self bookmarkSettingChanged:nil];
     } else if (obj == columnsField ||
                obj == rowsField ||

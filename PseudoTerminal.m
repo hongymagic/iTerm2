@@ -314,6 +314,9 @@ NSString *sessionsKey = @"sessions";
                            NSResizableWindowMask |
                            NSTexturedBackgroundWindowMask;
     switch (windowType) {
+        case WINDOW_TYPE_NORMAL:
+            styleMask = (NSBorderlessWindowMask | NSResizableWindowMask);
+            break;
         case WINDOW_TYPE_TOP:
         case WINDOW_TYPE_BOTTOM:
         case WINDOW_TYPE_LEFT:
@@ -447,6 +450,11 @@ NSString *sessionsKey = @"sessions";
                                              selector:@selector(_updateDrawerVisibility:)
                                                  name:@"iTermToolbeltVisibilityChanged"
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_updateWindows:)
+                                                 name:@"iTermUpdateWindows"
+                                               object:nil];
+
     PtyLog(@"set window inited");
     [self setWindowInited: YES];
     useTransparency_ = YES;
@@ -485,6 +493,13 @@ NSString *sessionsKey = @"sessions";
     terminalGuid_ = [[NSString stringWithFormat:@"pty-%@", [ProfileModel freshGuid]] retain];
 
     return self;
+}
+
+- (void)_updateWindows:(NSNotification *)notification
+{
+	NSDictionary *options = [notification userInfo];
+	BOOL borderlessWindow = [[options valueForKey:@"BorderlessWindow"] boolValue];
+	[self updateWindowBorders:borderlessWindow];
 }
 
 - (CGFloat)tabviewWidth
@@ -1809,7 +1824,7 @@ NSString *sessionsKey = @"sessions";
                 // Normal case
                 frame.origin.x = [screen visibleFrame].origin.x;
             }
-            
+
             if (frame.size.width > 0) {
                 [[self window] setFrame:frame display:YES];
             }
@@ -4252,8 +4267,8 @@ NSString *sessionsKey = @"sessions";
     } else if ([broadcastViewIds_ count] == 1) {
         // Turned on one session so add the current session.
         [broadcastViewIds_ addObject:[NSNumber numberWithInt:[[[self currentSession] view] viewId]]];
-	// NOTE: There may still be only one session. This is of use to focus
-	// follows mouse users who want to toggle particular panes.
+    // NOTE: There may still be only one session. This is of use to focus
+    // follows mouse users who want to toggle particular panes.
     }
     for (PTYTab *aTab in [self tabs]) {
         for (PTYSession *aSession in [aTab sessions]) {
@@ -5247,6 +5262,18 @@ NSString *sessionsKey = @"sessions";
 {
     [[[self currentSession] TERMINAL] reset];
     [[self currentSession] updateDisplay];
+}
+
+- (void)updateWindowBorders:(BOOL)borderlessWindow
+{
+    if (borderlessWindow)
+    {
+        [[self window] setStyleMask:(NSBorderlessWindowMask | NSResizableWindowMask)];
+    }
+    else
+    {
+        [[self window] setStyleMask:(NSTitledWindowMask | NSResizableWindowMask | NSClosableWindowMask)];
+    }
 }
 
 - (void)clearBuffer:(id)sender

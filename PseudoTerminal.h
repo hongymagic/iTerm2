@@ -933,6 +933,9 @@ NSWindowDelegate,
 // Send a reset to the current session's terminal.
 - (void)reset:(id)sender;
 
+// Set the window border style
+- (void)updateWindowBorders:(BOOL)borderlessWindow;
+
 // Clear the buffer of the current session.
 - (void)clearBuffer:(id)sender;
 

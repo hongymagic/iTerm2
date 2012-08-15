@@ -282,6 +282,10 @@ typedef enum { CURSOR_UNDERLINE, CURSOR_VERTICAL, CURSOR_BOX } ITermCursorType;
     IBOutlet NSButton *smartPlacement;
     BOOL defaultSmartPlacement;
 
+	// Remove borders from window
+	IBOutlet NSButton *borderlessWindow;
+	BOOL defaultBorderlessWindow;
+
     // Adjust window size when changing font size
     IBOutlet NSButton *adjustWindowForFontSizeChange;
     BOOL defaultAdjustWindowForFontSizeChange;
@@ -358,7 +362,7 @@ typedef enum { CURSOR_UNDERLINE, CURSOR_VERTICAL, CURSOR_BOX } ITermCursorType;
     NSString* arrangementsToolbarId;
     NSString* bookmarksToolbarId;
     NSString *mouseToolbarId;
-  
+
     // url handler stuff
     NSMutableDictionary *urlHandlersByGuid;
 
